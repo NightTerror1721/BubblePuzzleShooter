@@ -91,8 +91,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>src;libs\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>src;libs\headers\py;libs\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,8 +124,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>src;libs\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>src;libs\headers\py;libs\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,7 +156,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\assets.cpp" />
+    <ClCompile Include="src\audio.cpp" />
+    <ClCompile Include="src\bubble.cpp" />
+    <ClCompile Include="src\common.cpp" />
+    <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\game_object.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\py.cpp" />
+    <ClCompile Include="src\resources.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\assets.h" />
+    <ClInclude Include="src\audio.h" />
+    <ClInclude Include="src\bubble.h" />
+    <ClInclude Include="src\common.h" />
+    <ClInclude Include="src\game.h" />
+    <ClInclude Include="src\game_object.h" />
+    <ClInclude Include="src\manager.h" />
+    <ClInclude Include="src\memory.h" />
+    <ClInclude Include="src\py.h" />
+    <ClInclude Include="src\resources.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
