@@ -54,6 +54,7 @@ namespace pylib
 	{
 		loadResourceCache(ResourcePoint::Audio);
 		loadResourceCache(ResourcePoint::Textures);
+		loadResourceCache(ResourcePoint::BubbleModels);
 	}
 }
 
@@ -76,20 +77,19 @@ namespace
 		return TextureManager::root().load(filename, tag, x, y, w, h);
 	}
 
-	/*BubbleModel* PY(createBubbleModel) (const std::string& name, std::function<void()> precache)
+	BubbleModel* PY(createBubbleModel) (const std::string& name)
 	{
-		if (HasBubbleModel(name))
+		if (BubbleModelManager::hasModel(name))
 			return nullptr;
 
-		Ref<BubbleModel> model = RegisterBubbleModel(name);
-		precache();
+		Ref<BubbleModel> model = BubbleModelManager::createModel(name);
 		return &model;
 	}
 
 	bool PY(existsBubbleModel) (const std::string& name)
 	{
-		return HasBubbleModel(name);
-	}*/
+		return BubbleModelManager::hasModel(name);
+	}
 }
 
 
@@ -103,7 +103,8 @@ PYBIND11_EMBEDDED_MODULE(BPS, m) {
 	PUSH_PY_FUNC(m, loadTextureFromPart);
 
 
-	/*py::class_<BubbleModel> model{ m, "BubbleModel" };
+	/* BubbleModel */
+	py::class_<BubbleModel> model{ m, "BubbleModel" };
 
 	model.def(py::self == py::self);
 	model.def(py::self != py::self);
@@ -134,7 +135,7 @@ PYBIND11_EMBEDDED_MODULE(BPS, m) {
 
 
 	PUSH_PY_FUNC_EXT(m, createBubbleModel, py::return_value_policy::reference);
-	PUSH_PY_FUNC(m, existsBubbleModel);*/
+	PUSH_PY_FUNC(m, existsBubbleModel);
 
 
 

@@ -114,3 +114,12 @@ void GameController::processEvents()
 		}
 	}
 }
+
+void GameController::onCreateGameObject(GameObject& obj)
+{
+	obj._gc = this;
+}
+void GameController::onDestroyGameObject(GameObject& obj)
+{
+	obj._gc = nullptr;
+}

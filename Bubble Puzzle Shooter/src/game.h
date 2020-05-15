@@ -43,4 +43,8 @@ private:
 	void update(const sf::Time& delta);
 	void render();
 	void processEvents();
+
+protected:
+	virtual void onCreateGameObject(GameObject& obj) override;
+	virtual void onDestroyGameObject(GameObject& obj) override;
 };

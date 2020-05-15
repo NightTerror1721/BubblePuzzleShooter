@@ -274,6 +274,9 @@ public:
 	_Ty& operator* () { return *_ptr; }
 	const _Ty& operator* () const { return *_ptr; }
 
+	_Ty* operator& () { return _ptr; }
+	const _Ty* operator& () const { return _ptr; }
+
 	_Ty* operator->() { return _ptr; }
 	const _Ty* operator->() const { return _ptr; }
 

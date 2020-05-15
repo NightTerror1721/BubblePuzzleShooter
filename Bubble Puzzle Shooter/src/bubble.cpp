@@ -226,3 +226,51 @@ std::string Bubble::getLocalString(UInt8 index) const { return _localStrings[ind
 void Bubble::setLocalInt(UInt8 index, Int32 value) { _localInts[index] = value; }
 void Bubble::setLocalFloat(UInt8 index, const float& value) { _localFloats[index] = value; }
 void Bubble::setLocalString(UInt8 index, const std::string& value) { _localStrings[index] = value; }
+
+
+
+
+
+
+BubbleModelManager::BubbleModelManager() :
+	Manager{ nullptr }
+{}
+BubbleModelManager::~BubbleModelManager() {}
+
+Ref<BubbleModel> BubbleModelManager::createModel(const std::string& name)
+{
+	auto model = Instance.create<BubbleModel>(name);
+	model->name = name;
+	return model;
+}
+Ref<BubbleModel> BubbleModelManager::getModel(const std::string& name) { return Instance.get(name); }
+bool BubbleModelManager::hasModel(const std::string& name) { return Instance.has(name); }
+
+BubbleModelManager BubbleModelManager::Instance{};
+
+	
+
+
+
+
+
+BubbleHeap::BubbleHeap() :
+	MemoryAllocator{}
+{}
+BubbleHeap::~BubbleHeap() {}
+
+Ref<Bubble> BubbleHeap::create(const std::string& modelName, TextureManager& textures, bool editorMode, const BubbleColor& color)
+{
+	auto model = BubbleModelManager::getModel(modelName);
+	if (!model)
+		return nullptr;
+
+	auto bubble = alloc<Bubble>(model, textures);
+	model->init(&bubble, color, editorMode);
+
+	return bubble;
+}
+void BubbleHeap::destroy(const Ref<Bubble>& bub)
+{
+	free(bub);
+}

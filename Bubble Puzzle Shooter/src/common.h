@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <utility>
+#include <random>
 #include <string>
 #include <vector>
 #include <map>
@@ -76,7 +77,7 @@ public:
 	{
 		size_t operator() (const ID& id);
 	};
-	friend Hash;
+	friend class ID::Hash;
 };
 
 
@@ -112,6 +113,60 @@ class EventDispatcher
 {
 public:
 	virtual void dispatchEvent(const sf::Event& event) = 0;
+};
+
+
+class RNG
+{
+public:
+	typedef unsigned int RandomValue;
+	typedef unsigned int Seed;
+
+private:
+	std::minstd_rand _rand;
+	RandomValue _min;
+	RandomValue _max;
+
+public:
+	RNG();
+	RNG(Seed seed, RandomValue min = std::minstd_rand::min(), RandomValue max = std::minstd_rand::max());
+	RNG(const RNG&) = default;
+	RNG(RNG&&) = default;
+	~RNG();
+
+	RNG& operator= (const RNG&) = default;
+	RNG& operator= (RNG&&) = default;
+
+	RandomValue min() const;
+	void min(RandomValue value);
+
+	RandomValue max() const;
+	void max(RandomValue value);
+
+	RandomValue operator() (RandomValue min, RandomValue max);
+
+	float randomFloat();
+
+	friend RNG& operator>> (RNG& left, RandomValue& right);
+	friend RNG& operator>> (RNG& left, float& right);
+
+	friend bool operator== (RNG& left, RandomValue right);
+	friend bool operator== (RNG& left, float right);
+
+	friend bool operator!= (RNG& left, RandomValue right);
+	friend bool operator!= (RNG& left, float right);
+
+	friend bool operator> (RNG& left, RandomValue right);
+	friend bool operator> (RNG& left, float right);
+
+	friend bool operator< (RNG& left, RandomValue right);
+	friend bool operator< (RNG& left, float right);
+
+	inline RandomValue operator() (RandomValue max) { return (*this)(_min, max); }
+	inline RandomValue operator() () { return (*this)(_min, _max); }
+
+private:
+	void minmax(RandomValue min, RandomValue max);
 };
 
 

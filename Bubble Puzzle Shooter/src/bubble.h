@@ -218,3 +218,34 @@ public:
 	void setLocalString(UInt8 index, const std::string& value);
 };
 
+
+
+
+class BubbleModelManager : private Manager<BubbleModel>
+{
+public:
+	~BubbleModelManager();
+
+	static Ref<BubbleModel> createModel(const std::string& name);
+	static Ref<BubbleModel> getModel(const std::string& name);
+	static bool hasModel(const std::string& name);
+
+private:
+	static BubbleModelManager Instance;
+
+	BubbleModelManager();
+};
+
+
+
+
+class BubbleHeap : private MemoryAllocator<Bubble>
+{
+public:
+	BubbleHeap();
+	~BubbleHeap();
+
+	Ref<Bubble> create(const std::string& modelName, TextureManager& textures, bool editorMode, const BubbleColor& color = BubbleColor::defaultColor());
+	void destroy(const Ref<Bubble>& bub);
+};
+

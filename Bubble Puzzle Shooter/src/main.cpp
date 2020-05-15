@@ -3,6 +3,7 @@
 #include "memory.h"
 #include "game.h"
 #include "manager.h"
+#include "bubble.h"
 
 int main(int argc, char** argv)
 {

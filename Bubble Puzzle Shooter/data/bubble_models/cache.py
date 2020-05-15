@@ -1,4 +1,3 @@
+from data.bubble_models.utils import importModel
 
-# IMPORT BUBBLE MODELS #
-
-import data.bubble_models.color_bubble
+importModel("color_bubble")

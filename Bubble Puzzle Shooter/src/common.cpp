@@ -41,6 +41,55 @@ bool operator!= (const Object& left, const Object& right) { return left._id != r
 
 
 
+RNG::RNG() :
+	RNG{ utils::systemTime() }
+{}
+RNG::RNG(Seed seed, RandomValue min, RandomValue max) :
+	_rand{ seed },
+	_min{ min },
+	_max{ max }
+{}
+RNG::~RNG() {}
+
+RNG::RandomValue RNG::min() const { return _min; }
+void RNG::min(RandomValue value) { minmax(value, _max); }
+
+RNG::RandomValue RNG::max() const { return _max; }
+void RNG::max(RandomValue value) { minmax(_min, value); }
+
+RNG::RandomValue RNG::operator() (RandomValue __min, RandomValue __max)
+{
+	auto min = std::min(__min, __max);
+	auto max = std::max(__min, __max);
+	return (_rand() % (max - min)) + min;
+}
+
+float RNG::randomFloat() { return _rand() / static_cast<float>(std::minstd_rand::max()); }
+
+void RNG::minmax(RandomValue min, RandomValue max)
+{
+	_min = std::min(min, max);
+	_max = std::max(min, max);
+}
+
+RNG& operator>> (RNG& left, RNG::RandomValue& right) { right = left(); return left; }
+RNG& operator>> (RNG& left, float& right) { right = left.randomFloat(); return left; }
+
+bool operator== (RNG& left, RNG::RandomValue right) { return left() == right; }
+bool operator== (RNG& left, float right) { return left.randomFloat() == right; }
+
+bool operator!= (RNG& left, RNG::RandomValue right) { return left() != right; }
+bool operator!= (RNG& left, float right) { return left.randomFloat() != right; }
+
+bool operator> (RNG& left, RNG::RandomValue right) { return left() > right; }
+bool operator> (RNG& left, float right) { return left.randomFloat() > right; }
+
+bool operator< (RNG& left, RNG::RandomValue right) { return left() < right; }
+bool operator< (RNG& left, float right) { return left.randomFloat() < right; }
+
+
+
+
 namespace utils
 {
 	long long int systemTime()

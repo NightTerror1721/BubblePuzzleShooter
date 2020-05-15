@@ -27,6 +27,9 @@ public:
 protected:
 	GameController& getGameController();
 	const GameController& getGameController() const;
+
+public:
+	friend class GameController;
 };
 
 
