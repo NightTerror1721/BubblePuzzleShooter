@@ -121,8 +121,11 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>libs\static-libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>py\python37.lib;py\python3.lib;sfml\freetype.lib;sfml\ogg.lib;sfml\openal32.lib;sfml\sfml-audio-d.lib;sfml\sfml-graphics-d.lib;sfml\sfml-main-d.lib;sfml\sfml-network-d.lib;sfml\sfml-system-d.lib;sfml\sfml-window-d.lib;sfml\vorbis.lib;sfml\vorbisenc.lib;sfml\vorbisfile.lib;sfml\flac.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>py\python38_d.lib;py\python3_d.lib;py\python38.lib;py\python3.lib;sfml\freetype.lib;sfml\ogg.lib;sfml\openal32.lib;sfml\sfml-audio-d.lib;sfml\sfml-graphics-d.lib;sfml\sfml-main-d.lib;sfml\sfml-network-d.lib;sfml\sfml-system-d.lib;sfml\sfml-window-d.lib;sfml\vorbis.lib;sfml\vorbisenc.lib;sfml\vorbisfile.lib;sfml\flac.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d  "$(ProjectDir)libs\dynamic-libs\*.*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -164,8 +167,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>libs\static-libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>py\python37.lib;py\python3.lib;sfml\freetype.lib;sfml\ogg.lib;sfml\openal32.lib;sfml\sfml-audio.lib;sfml\sfml-graphics.lib;sfml\sfml-main.lib;sfml\sfml-network.lib;sfml\sfml-system.lib;sfml\sfml-window.lib;sfml\vorbis.lib;sfml\vorbisenc.lib;sfml\vorbisfile.lib;sfml\flac.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>py\python38.lib;py\python3.lib;sfml\freetype.lib;sfml\ogg.lib;sfml\openal32.lib;sfml\sfml-audio.lib;sfml\sfml-graphics.lib;sfml\sfml-main.lib;sfml\sfml-network.lib;sfml\sfml-system.lib;sfml\sfml-window.lib;sfml\vorbis.lib;sfml\vorbisenc.lib;sfml\vorbisfile.lib;sfml\flac.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d  "$(ProjectDir)libs\dynamic-libs\*.*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\assets.cpp" />
