@@ -139,9 +139,7 @@ PyAPI_FUNC(wchar_t *) Py_GetExecPrefix(void);
 PyAPI_FUNC(wchar_t *) Py_GetPath(void);
 #ifdef Py_BUILD_CORE
 PyAPI_FUNC(_PyInitError) _PyPathConfig_Init(const _PyCoreConfig *core_config);
-PyAPI_FUNC(int) _PyPathConfig_ComputeArgv0(
-    int argc, wchar_t **argv,
-    PyObject **argv0_p);
+PyAPI_FUNC(PyObject*) _PyPathConfig_ComputeArgv0(int argc, wchar_t **argv);
 PyAPI_FUNC(int) _Py_FindEnvConfigValue(
     FILE *env_file,
     const wchar_t *key,
@@ -154,6 +152,7 @@ int _Py_CheckPython3(void);
 #endif
 
 /* In their own files */
+PyAPI_FUNC(const char *) Anaconda_GetVersion(void);
 PyAPI_FUNC(const char *) Py_GetVersion(void);
 PyAPI_FUNC(const char *) Py_GetPlatform(void);
 PyAPI_FUNC(const char *) Py_GetCopyright(void);

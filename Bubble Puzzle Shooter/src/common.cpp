@@ -42,7 +42,7 @@ bool operator!= (const Object& left, const Object& right) { return left._id != r
 
 
 RNG::RNG() :
-	RNG{ utils::systemTime() }
+	RNG{ static_cast<Seed>(utils::systemTime()) }
 {}
 RNG::RNG(Seed seed, RandomValue min, RandomValue max) :
 	_rand{ seed },
