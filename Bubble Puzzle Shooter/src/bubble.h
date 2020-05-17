@@ -216,6 +216,10 @@ public:
 	void setLocalInt(UInt8 index, const Int32 value);
 	void setLocalFloat(UInt8 index, const float& value);
 	void setLocalString(UInt8 index, const std::string& value);
+
+	void copyLocalInts(const std::vector<UInt32>& locals);
+	void copyLocalFloats(const std::vector<float>& locals);
+	void copyLocalStrings(const std::vector<std::string>& locals);
 };
 
 
@@ -247,5 +251,57 @@ public:
 
 	Ref<Bubble> create(const std::string& modelName, TextureManager& textures, bool editorMode, const BubbleColor& color = BubbleColor::defaultColor());
 	void destroy(const Ref<Bubble>& bub);
+};
+
+
+
+
+class MetaBubble
+{
+private:
+	std::string _model;
+	BubbleColor _color;
+
+	std::vector<UInt32> _extraInts;
+	std::vector<float> _extraFloats;
+	std::vector<std::string> _extraStrings;
+
+public:
+	MetaBubble();
+	MetaBubble(const MetaBubble&) = default;
+	MetaBubble(MetaBubble&&) = default;
+	~MetaBubble();
+
+	MetaBubble& operator= (const MetaBubble&) = default;
+	MetaBubble& operator= (MetaBubble&&) = default;
+
+	operator bool() const;
+	friend bool operator! (const MetaBubble& left);
+
+	friend bool operator== (const MetaBubble& left, const MetaBubble& right);
+	friend bool operator!= (const MetaBubble& left, const MetaBubble& right);
+
+	bool isInvalid() const;
+
+	const std::string& model() const;
+	void model(const std::string& model);
+
+	const BubbleColor& color() const;
+	void color(const BubbleColor& color);
+
+	void setNumExtraInts(UInt8 count);
+	void setNumExtraFloats(UInt8 count);
+	void setNumExtraStrings(UInt8 count);
+
+	UInt32 extraInt(UInt8 index) const;
+	void extraInt(UInt8 index, UInt32 value);
+
+	float extraFloat(UInt8 index) const;
+	void extraFloat(UInt8 index, float value);
+
+	const std::string& extraString(UInt8 index) const;
+	void extraString(UInt8 index, const std::string& value);
+
+	Ref<Bubble> createBubble(BubbleHeap& heap, TextureManager& textures, bool editorMode);
 };
 

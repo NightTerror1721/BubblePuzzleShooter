@@ -52,6 +52,7 @@ Path operator"" _p(const char* str, size_t size);
 
 namespace ResourcePoint
 {
+	extern const Path Data;
 	extern const Path Textures;
 	extern const Path Audio;
 	extern const Path Sounds;

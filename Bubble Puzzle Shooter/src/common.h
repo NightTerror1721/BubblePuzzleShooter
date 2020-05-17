@@ -7,6 +7,7 @@
 #include <functional>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <utility>
 #include <random>
 #include <string>
@@ -172,5 +173,43 @@ private:
 
 namespace utils
 {
+	extern const std::string EmptyString;
 	long long int systemTime();
+
+
+	template<typename _Ty>
+	constexpr bool is_pair(_Ty value)
+	{
+		static_assert(std::is_integral<_Ty>::value);
+		return (value % 2) == 0;
+	}
+
+	template<typename _Ty, typename... _Args>
+	inline _Ty& reconstruct(_Ty& object, _Args&&... args)
+	{
+		new(&object) _Ty(std::forward<_Args>(args)...);
+		return object;
+	}
+
+	template<typename _Ty>
+	inline void destruct(_Ty& object)
+	{
+		object.~_Ty();
+	}
+
+	template<typename _Ty>
+	inline _Ty& from_string(const std::string& string, _Ty& value)
+	{
+		std::stringstream ss(string);
+		ss >> value;
+		return value;
+	}
+
+	template<typename _Ty>
+	inline std::string to_string(const _Ty& value)
+	{
+		std::stringstream ss;
+		ss << value;
+		return ss.str();
+	}
 }

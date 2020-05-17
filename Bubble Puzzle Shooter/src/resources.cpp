@@ -35,6 +35,7 @@ Path operator"" _p(const char* str, size_t size) { return std::string{ str, size
 
 namespace ResourcePoint
 {
+	const Path Data{ "data" };
 	const Path Textures{ "data"_p << "textures" };
 	const Path Audio{ "data"_p << "audio" };
 	const Path Sounds{ "data"_p << "audio" << "sounds" };

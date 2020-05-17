@@ -92,6 +92,8 @@ bool operator< (RNG& left, float right) { return left.randomFloat() < right; }
 
 namespace utils
 {
+	const std::string EmptyString;
+
 	long long int systemTime()
 	{
 		return std::chrono::system_clock::now().time_since_epoch().count();

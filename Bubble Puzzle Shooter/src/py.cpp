@@ -50,6 +50,24 @@ namespace pylib
 		}
 	}
 
+	py::dict executePropertiesPythonScript(const std::string& filepath)
+	{
+		py::dict props{};
+		try
+		{
+			py::eval_file(filepath, py::globals(), props);
+		}
+		catch (py::error_already_set ex)
+		{
+			std::cout << "Python exception occurs: " << ex.what() << std::endl;
+		}
+		catch (std::exception& ex)
+		{
+			std::cout << "Unexpected exception occurs: " << ex.what() << std::endl;
+		}
+		return props;
+	}
+
 	void loadResourceCaches()
 	{
 		loadResourceCache(ResourcePoint::Audio);

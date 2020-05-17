@@ -227,6 +227,46 @@ void Bubble::setLocalInt(UInt8 index, Int32 value) { _localInts[index] = value; 
 void Bubble::setLocalFloat(UInt8 index, const float& value) { _localFloats[index] = value; }
 void Bubble::setLocalString(UInt8 index, const std::string& value) { _localStrings[index] = value; }
 
+void Bubble::copyLocalInts(const std::vector<UInt32>& locals)
+{
+	size_t len = static_cast<size_t>(_model->localInts);
+	if (locals.empty() || len < 1)
+	{
+		_localInts.clear();
+		return;
+	}
+
+	size_t max = std::min(len, locals.size());
+	_localInts.resize(max);
+	std::copy(locals.begin(), locals.end(), _localInts.begin());
+}
+void Bubble::copyLocalFloats(const std::vector<float>& locals)
+{
+	size_t len = static_cast<size_t>(_model->localFloats);
+	if (locals.empty() || len < 1)
+	{
+		_localFloats.clear();
+		return;
+	}
+
+	size_t max = std::min(len, locals.size());
+	_localFloats.resize(max);
+	std::copy(locals.begin(), locals.end(), _localFloats.begin());
+}
+void Bubble::copyLocalStrings(const std::vector<std::string>& locals)
+{
+	size_t len = static_cast<size_t>(_model->localStrings);
+	if (locals.empty() || len < 1)
+	{
+		_localStrings.clear();
+		return;
+	}
+
+	size_t max = std::min(len, locals.size());
+	_localStrings.resize(max);
+	std::copy(locals.begin(), locals.end(), _localStrings.begin());
+}
+
 
 
 
@@ -273,4 +313,58 @@ Ref<Bubble> BubbleHeap::create(const std::string& modelName, TextureManager& tex
 void BubbleHeap::destroy(const Ref<Bubble>& bub)
 {
 	free(bub);
+}
+
+
+
+
+
+
+MetaBubble::MetaBubble() :
+	_model{},
+	_color{ BubbleColor::defaultColor() },
+	_extraInts{},
+	_extraFloats{},
+	_extraStrings{}
+{}
+MetaBubble::~MetaBubble() {}
+
+MetaBubble::operator bool() const { return _model.empty(); }
+bool operator! (const MetaBubble& left) { return !left._model.empty(); }
+
+bool operator== (const MetaBubble& left, const MetaBubble& right) { return left._model == right._model; }
+bool operator!= (const MetaBubble& left, const MetaBubble& right) { return left._model != right._model; }
+
+bool MetaBubble::isInvalid() const { return _model.empty(); }
+
+const std::string& MetaBubble::model() const { return _model; }
+void MetaBubble::model(const std::string& model) { _model = model; }
+
+const BubbleColor& MetaBubble::color() const { return _color; }
+void MetaBubble::color(const BubbleColor& color) { _color = color; }
+
+void MetaBubble::setNumExtraInts(UInt8 count) { _extraInts.resize(count, 0); }
+void MetaBubble::setNumExtraFloats(UInt8 count) { _extraFloats.resize(count, 0.f); }
+void MetaBubble::setNumExtraStrings(UInt8 count) { _extraStrings.resize(count, {}); }
+
+UInt32 MetaBubble::extraInt(UInt8 index) const { return index >= _extraInts.size() ? 0 : _extraInts[0]; }
+void MetaBubble::extraInt(UInt8 index, UInt32 value) { if (index < _extraInts.size()) _extraInts[index] = value; }
+
+float MetaBubble::extraFloat(UInt8 index) const { return index >= _extraFloats.size() ? 0.f : _extraFloats[0]; }
+void MetaBubble::extraFloat(UInt8 index, float value) { if (index < _extraFloats.size()) _extraFloats[index] = value; }
+
+const std::string& MetaBubble::extraString(UInt8 index) const { return index >= _extraStrings.size() ? utils::EmptyString : _extraStrings[0]; }
+void MetaBubble::extraString(UInt8 index, const std::string & value) { if (index < _extraStrings.size()) _extraStrings[index] = value; }
+
+Ref<Bubble> MetaBubble::createBubble(BubbleHeap& heap, TextureManager& textures, bool editorMode)
+{
+	auto bubble = heap.create(_model, textures, editorMode, _color);
+	if (!bubble)
+		return nullptr;
+
+	bubble->copyLocalInts(_extraInts);
+	bubble->copyLocalFloats(_extraFloats);
+	bubble->copyLocalStrings(_extraStrings);
+
+	return bubble;
 }

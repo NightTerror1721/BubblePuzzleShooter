@@ -23,5 +23,6 @@ inline void unbind##type () { _##type = nullptr; } \
 namespace pylib
 {
 	pybind::object executePythonScript(const std::string& filepath);
+	pybind::dict executePropertiesPythonScript(const std::string& filepath);
 	void loadResourceCaches();
 }

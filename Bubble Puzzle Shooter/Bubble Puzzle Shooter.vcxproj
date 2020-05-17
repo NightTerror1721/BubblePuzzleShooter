@@ -180,7 +180,9 @@
     <ClCompile Include="src\common.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\game_object.cpp" />
+    <ClCompile Include="src\level.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\props.cpp" />
     <ClCompile Include="src\py.cpp" />
     <ClCompile Include="src\resources.cpp" />
   </ItemGroup>
@@ -191,8 +193,10 @@
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\game_object.h" />
+    <ClInclude Include="src\level.h" />
     <ClInclude Include="src\manager.h" />
     <ClInclude Include="src\memory.h" />
+    <ClInclude Include="src\props.h" />
     <ClInclude Include="src\py.h" />
     <ClInclude Include="src\resources.h" />
   </ItemGroup>

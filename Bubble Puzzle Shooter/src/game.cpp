@@ -1,5 +1,7 @@
 #include "game.h"
 
+#include "props.h"
+
 GameController::GameController(const std::string& name) :
 	GameObjectContainer{},
 	_close{ true },
@@ -78,6 +80,7 @@ void GameController::loop()
 
 void GameController::init()
 {
+	Properties::load();
 	pylib::loadResourceCaches();
 	resetWindow();
 }
