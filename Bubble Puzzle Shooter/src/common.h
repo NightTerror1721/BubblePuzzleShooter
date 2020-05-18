@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <compare>
 #include <utility>
 #include <random>
 #include <string>
@@ -173,8 +174,43 @@ private:
 
 namespace utils
 {
+	template<typename _Ty>
+	using matrix = std::vector<std::vector<_Ty>>;
+
 	extern const std::string EmptyString;
 	long long int systemTime();
+
+	
+	template<typename _Ty, typename _MinTy, typename _MaxTy>
+	constexpr _Ty clamp(_Ty value, _MinTy min, _MaxTy max)
+	{
+		static_assert(std::is_integral<_Ty>::value || std::is_floating_point<_Ty>::value);
+		static_assert(std::is_integral<_MinTy>::value || std::is_floating_point<_MinTy>::value);
+		static_assert(std::is_integral<_MaxTy>::value || std::is_floating_point<_MaxTy>::value);
+
+		if constexpr (std::is_same<_MinTy, _Ty>::value)
+		{
+			if constexpr (std::is_same<_MaxTy, _Ty>::value)
+			{
+				return std::min<_Ty>(max, std::max<_Ty>(min, value));
+			}
+			else
+			{
+				return std::min<_Ty>(static_cast<_Ty>(max), std::max<_Ty>(min, value));
+			}
+		}
+		else
+		{
+			if constexpr (std::is_same<_MaxTy, _Ty>::value)
+			{
+				return std::min<_Ty>(max, std::max<_Ty>(static_cast<_Ty>(min), value));
+			}
+			else
+			{
+				return std::min<_Ty>(static_cast<_Ty>(max), std::max<_Ty>(static_cast<_Ty>(min), value));
+			}
+		}
+	}
 
 
 	template<typename _Ty>
@@ -211,5 +247,31 @@ namespace utils
 		std::stringstream ss;
 		ss << value;
 		return ss.str();
+	}
+
+	template<typename _Ty, typename _SizeType>
+	inline std::vector<_Ty> static_vector(_SizeType size, const _Ty& template_value)
+	{
+		if constexpr (std::is_same<_SizeType, size_t>::value)
+		{
+			return std::vector(size, template_value);
+		}
+		else
+		{
+			return std::vector(static_cast<size_t>(size), template_value);
+		}
+	}
+
+	template<typename _Ty, typename _RowSizeType, typename _ColumnSizeType>
+	inline std::vector<std::vector<_Ty>> static_matrix(_RowSizeType rows, _ColumnSizeType columns, const _Ty& template_value)
+	{
+		if constexpr (std::is_same<_RowSizeType, size_t>::value)
+		{
+			return std::vector(rows, static_vector<_Ty, _ColumnSizeType>(columns, template_value));
+		}
+		else
+		{
+			return std::vector(static_cast<size_t>(rows), static_vector<_Ty, _ColumnSizeType>(columns, template_value));
+		}
 	}
 }

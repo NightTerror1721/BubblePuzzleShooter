@@ -21,13 +21,6 @@ BubbleColor::BubbleColor(UInt8 code) :
 BubbleColor::operator bool() const { return _code; }
 bool operator! (const BubbleColor& left) { return !left._code; }
 
-bool operator== (const BubbleColor& left, const BubbleColor& right) { return left._code == right._code; }
-bool operator!= (const BubbleColor& left, const BubbleColor& right) { return left._code != right._code; }
-bool operator> (const BubbleColor& left, const BubbleColor& right) { return left._code > right._code; }
-bool operator< (const BubbleColor& left, const BubbleColor& right) { return left._code < right._code; }
-bool operator>= (const BubbleColor& left, const BubbleColor& right) { return left._code >= right._code; }
-bool operator<= (const BubbleColor& left, const BubbleColor& right) { return left._code <= right._code; }
-
 UInt8 BubbleColor::code() const { return _code; }
 std::string BubbleColor::name() const
 {
@@ -271,6 +264,33 @@ void Bubble::copyLocalStrings(const std::vector<std::string>& locals)
 
 
 
+BubbleIdentifier::BubbleIdentifier() :
+	_model{},
+	_color{ BubbleColor::defaultColor() }
+{}
+BubbleIdentifier::BubbleIdentifier(const std::string& model, const BubbleColor& color) :
+	_model{ model },
+	_color{ color }
+{}
+BubbleIdentifier::~BubbleIdentifier() {}
+
+BubbleIdentifier::operator bool() const { return !_model.empty(); }
+bool operator! (const BubbleIdentifier & right) { return right._model.empty(); }
+
+bool BubbleIdentifier::isInvalid() const { return _model.empty(); }
+
+const std::string& BubbleIdentifier::model() const { return _model; }
+void BubbleIdentifier::model(const std::string& model) { _model = model; }
+
+const BubbleColor& BubbleIdentifier::color() const { return _color; }
+void BubbleIdentifier::color(const BubbleColor& color) { _color = color; }
+
+BubbleIdentifier BubbleIdentifier::invalid() { return {}; }
+
+
+
+
+
 
 BubbleModelManager::BubbleModelManager() :
 	Manager{ nullptr }
@@ -310,6 +330,13 @@ Ref<Bubble> BubbleHeap::create(const std::string& modelName, TextureManager& tex
 
 	return bubble;
 }
+Ref<Bubble> BubbleHeap::create(const BubbleIdentifier& identifier, TextureManager& textures, bool editorMode)
+{
+	if (!identifier)
+		return nullptr;
+
+	return create(identifier.model(), textures, editorMode, identifier.color());
+}
 void BubbleHeap::destroy(const Ref<Bubble>& bub)
 {
 	free(bub);
@@ -321,27 +348,30 @@ void BubbleHeap::destroy(const Ref<Bubble>& bub)
 
 
 MetaBubble::MetaBubble() :
-	_model{},
-	_color{ BubbleColor::defaultColor() },
+	_identifier{},
 	_extraInts{},
 	_extraFloats{},
 	_extraStrings{}
 {}
 MetaBubble::~MetaBubble() {}
 
-MetaBubble::operator bool() const { return _model.empty(); }
-bool operator! (const MetaBubble& left) { return !left._model.empty(); }
+MetaBubble::operator bool() const { return _identifier; }
+bool operator! (const MetaBubble& right) { return !right._identifier; }
 
-bool operator== (const MetaBubble& left, const MetaBubble& right) { return left._model == right._model; }
-bool operator!= (const MetaBubble& left, const MetaBubble& right) { return left._model != right._model; }
+bool operator== (const MetaBubble& left, const MetaBubble& right) { return left._identifier == right._identifier; }
+bool operator!= (const MetaBubble& left, const MetaBubble& right) { return left._identifier != right._identifier; }
 
-bool MetaBubble::isInvalid() const { return _model.empty(); }
+bool MetaBubble::isInvalid() const { return _identifier.isInvalid(); }
 
-const std::string& MetaBubble::model() const { return _model; }
-void MetaBubble::model(const std::string& model) { _model = model; }
+BubbleIdentifier& MetaBubble::identifier() { return _identifier; }
+const BubbleIdentifier& MetaBubble::identifier() const { return _identifier; }
+void MetaBubble::identifier(const BubbleIdentifier& identifier) { _identifier = identifier; }
 
-const BubbleColor& MetaBubble::color() const { return _color; }
-void MetaBubble::color(const BubbleColor& color) { _color = color; }
+const std::string& MetaBubble::model() const { return _identifier.model(); }
+void MetaBubble::model(const std::string& model) { _identifier.model(model); }
+
+const BubbleColor& MetaBubble::color() const { return _identifier.color(); }
+void MetaBubble::color(const BubbleColor& color) { _identifier.color(color); }
 
 void MetaBubble::setNumExtraInts(UInt8 count) { _extraInts.resize(count, 0); }
 void MetaBubble::setNumExtraFloats(UInt8 count) { _extraFloats.resize(count, 0.f); }
@@ -358,7 +388,7 @@ void MetaBubble::extraString(UInt8 index, const std::string & value) { if (index
 
 Ref<Bubble> MetaBubble::createBubble(BubbleHeap& heap, TextureManager& textures, bool editorMode)
 {
-	auto bubble = heap.create(_model, textures, editorMode, _color);
+	auto bubble = heap.create(_identifier, textures, editorMode);
 	if (!bubble)
 		return nullptr;
 

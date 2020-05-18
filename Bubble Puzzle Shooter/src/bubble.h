@@ -40,12 +40,8 @@ public:
 	operator bool() const;
 	friend bool operator! (const BubbleColor& left);
 
-	friend bool operator== (const BubbleColor& left, const BubbleColor& right);
-	friend bool operator!= (const BubbleColor& left, const BubbleColor& right);
-	friend bool operator> (const BubbleColor& left, const BubbleColor& right);
-	friend bool operator< (const BubbleColor& left, const BubbleColor& right);
-	friend bool operator>= (const BubbleColor& left, const BubbleColor& right);
-	friend bool operator<= (const BubbleColor& left, const BubbleColor& right);
+	auto operator<=> (const BubbleColor&) const = default;
+	bool operator== (const BubbleColor&) const = default;
 
 	UInt8 code() const;
 	std::string name() const;
@@ -225,6 +221,45 @@ public:
 
 
 
+class BubbleIdentifier
+{
+private:
+	std::string _model;
+	BubbleColor _color;
+
+public:
+	BubbleIdentifier();
+	BubbleIdentifier(const std::string& model, const BubbleColor& color);
+	BubbleIdentifier(const BubbleIdentifier&) = default;
+	BubbleIdentifier(BubbleIdentifier&&) = default;
+	~BubbleIdentifier();
+
+	BubbleIdentifier& operator= (const BubbleIdentifier&) = default;
+	BubbleIdentifier& operator= (BubbleIdentifier&&) = default;
+
+	operator bool() const;
+	friend bool operator! (const BubbleIdentifier& right);
+
+	bool operator== (const BubbleIdentifier&) const = default;
+	auto operator<=> (const BubbleIdentifier&) const = default;
+
+	bool isInvalid() const;
+
+	const std::string& model() const;
+	void model(const std::string& model);
+
+	const BubbleColor& color() const;
+	void color(const BubbleColor& color);
+
+	static BubbleIdentifier invalid();
+
+private:
+	int compare(const BubbleIdentifier& right);
+};
+
+
+
+
 class BubbleModelManager : private Manager<BubbleModel>
 {
 public:
@@ -250,6 +285,7 @@ public:
 	~BubbleHeap();
 
 	Ref<Bubble> create(const std::string& modelName, TextureManager& textures, bool editorMode, const BubbleColor& color = BubbleColor::defaultColor());
+	Ref<Bubble> create(const BubbleIdentifier& identifier, TextureManager& textures, bool editorMode);
 	void destroy(const Ref<Bubble>& bub);
 };
 
@@ -259,8 +295,7 @@ public:
 class MetaBubble
 {
 private:
-	std::string _model;
-	BubbleColor _color;
+	BubbleIdentifier _identifier;
 
 	std::vector<UInt32> _extraInts;
 	std::vector<float> _extraFloats;
@@ -276,12 +311,16 @@ public:
 	MetaBubble& operator= (MetaBubble&&) = default;
 
 	operator bool() const;
-	friend bool operator! (const MetaBubble& left);
+	friend bool operator! (const MetaBubble& right);
 
 	friend bool operator== (const MetaBubble& left, const MetaBubble& right);
 	friend bool operator!= (const MetaBubble& left, const MetaBubble& right);
 
 	bool isInvalid() const;
+
+	BubbleIdentifier& identifier();
+	const BubbleIdentifier& identifier() const;
+	void identifier(const BubbleIdentifier& identifier);
 
 	const std::string& model() const;
 	void model(const std::string& model);
