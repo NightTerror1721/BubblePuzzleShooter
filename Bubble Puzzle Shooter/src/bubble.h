@@ -5,6 +5,7 @@
 
 
 class Bubble;
+class BubbleHeap;
 
 enum class BubbleColorType
 {
@@ -59,8 +60,8 @@ public:
 	friend Mask operator- (Mask left, const BubbleColor& right);
 	friend Mask operator- (const BubbleColor& left, Mask right);
 
-	friend Mask operator& (Mask left, const BubbleColor& right);
-	friend Mask operator& (const BubbleColor& left, Mask right);
+	friend bool operator& (Mask left, const BubbleColor& right);
+	friend bool operator& (const BubbleColor& left, Mask right);
 
 private:
 	BubbleColor(UInt8 code);
@@ -79,6 +80,9 @@ public:
 	static BubbleColor defaultColor();
 };
 
+BubbleColor::Mask& operator+= (BubbleColor::Mask& left, const BubbleColor& right);
+BubbleColor::Mask& operator-= (BubbleColor::Mask& left, const BubbleColor& right);
+
 
 
 
@@ -92,6 +96,7 @@ struct BubbleModel
 	bool floating;
 	bool destroyInBottom;
 	bool requireDestroyToClear;
+	bool onlyBoardColorInArrowGen;
 
 	Int8 resistence;
 
@@ -251,10 +256,9 @@ public:
 	const BubbleColor& color() const;
 	void color(const BubbleColor& color);
 
-	static BubbleIdentifier invalid();
+	Ref<Bubble> createBubble(BubbleHeap& heap, TextureManager& textures, bool editorMode) const;
 
-private:
-	int compare(const BubbleIdentifier& right);
+	static BubbleIdentifier invalid();
 };
 
 
@@ -262,17 +266,23 @@ private:
 
 class BubbleModelManager : private Manager<BubbleModel>
 {
+private:
+	std::string _defaultModel;
+
 public:
 	~BubbleModelManager();
 
 	static Ref<BubbleModel> createModel(const std::string& name);
 	static Ref<BubbleModel> getModel(const std::string& name);
 	static bool hasModel(const std::string& name);
+	static Ref<BubbleModel> getDefaultModel();
 
 private:
 	static BubbleModelManager Instance;
 
 	BubbleModelManager();
+
+	static std::string loadDefaultModel();
 };
 
 
@@ -292,55 +302,31 @@ public:
 
 
 
-class MetaBubble
+class RandomBubbleModelSelector
 {
-private:
-	BubbleIdentifier _identifier;
+public:
+	static constexpr UInt16 MaxScore = 1000;
+	static constexpr UInt16 MinScore = 0;
 
-	std::vector<UInt32> _extraInts;
-	std::vector<float> _extraFloats;
-	std::vector<std::string> _extraStrings;
+private:
+	std::map<std::string, UInt16> _models;
+	RNG::RandomValue _score = 0;
+	bool _recompute = true;
 
 public:
-	MetaBubble();
-	MetaBubble(const MetaBubble&) = default;
-	MetaBubble(MetaBubble&&) = default;
-	~MetaBubble();
+	RandomBubbleModelSelector() = default;
+	RandomBubbleModelSelector(const RandomBubbleModelSelector&) = default;
+	RandomBubbleModelSelector(RandomBubbleModelSelector&&) = default;
+	~RandomBubbleModelSelector() = default;
 
-	MetaBubble& operator= (const MetaBubble&) = default;
-	MetaBubble& operator= (MetaBubble&&) = default;
+	RandomBubbleModelSelector& operator= (const RandomBubbleModelSelector&) = default;
+	RandomBubbleModelSelector& operator= (RandomBubbleModelSelector&&) = default;
 
-	operator bool() const;
-	friend bool operator! (const MetaBubble& right);
+	void setModelScore(const std::string& model, UInt16 score);
+	UInt16 getModelScore(const std::string& model) const;
 
-	friend bool operator== (const MetaBubble& left, const MetaBubble& right);
-	friend bool operator!= (const MetaBubble& left, const MetaBubble& right);
+	Ref<BubbleModel> selectModel(RNG& rand) const;
 
-	bool isInvalid() const;
-
-	BubbleIdentifier& identifier();
-	const BubbleIdentifier& identifier() const;
-	void identifier(const BubbleIdentifier& identifier);
-
-	const std::string& model() const;
-	void model(const std::string& model);
-
-	const BubbleColor& color() const;
-	void color(const BubbleColor& color);
-
-	void setNumExtraInts(UInt8 count);
-	void setNumExtraFloats(UInt8 count);
-	void setNumExtraStrings(UInt8 count);
-
-	UInt32 extraInt(UInt8 index) const;
-	void extraInt(UInt8 index, UInt32 value);
-
-	float extraFloat(UInt8 index) const;
-	void extraFloat(UInt8 index, float value);
-
-	const std::string& extraString(UInt8 index) const;
-	void extraString(UInt8 index, const std::string& value);
-
-	Ref<Bubble> createBubble(BubbleHeap& heap, TextureManager& textures, bool editorMode);
+private:
+	void computeScore() const;
 };
-

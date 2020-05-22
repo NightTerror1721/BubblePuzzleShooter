@@ -66,6 +66,10 @@ RNG::RandomValue RNG::operator() (RandomValue __min, RandomValue __max)
 
 float RNG::randomFloat() { return _rand() / static_cast<float>(std::minstd_rand::max()); }
 
+RNG::Seed RNG::randomSeed() { return static_cast<Seed>(_rand()); }
+
+RNG RNG::randomRNG() { return { randomSeed() }; }
+
 void RNG::minmax(RandomValue min, RandomValue max)
 {
 	_min = std::min(min, max);

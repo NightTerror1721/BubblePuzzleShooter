@@ -12,7 +12,5 @@ int main(int argc, char** argv)
 	gc.setStyle(WindowStyle::Default);
 	gc.start();
 
-	std::cout << Properties::getString("testprop", "nope") << std::endl;
-
 	return 0;
 }

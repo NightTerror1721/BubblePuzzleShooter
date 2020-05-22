@@ -13,30 +13,24 @@ def onInserted(self):
 def onExplode(self):
     pass
     
-def onNeighborInserted(bubble, color, editorMode):
+def onNeighborInserted(self, other):
     pass
 
-def onNeighborExplode(bubble, color, editorMode):
+def onNeighborExplode(self, other):
     pass
 
-model.colorType = BubbleColorType.NormalColor
+colorType = BubbleColorType.NormalColor
 
-model.floating = False
-model.destroyInBottom = False
-model.requireDestroyToClear = False
+floating = False
+destroyInBottom = False
+requireDestroyToClear = True
+onlyBoardColorInArrowGen = True
 
-model.resistence = 0
+resistence = 0
 
-model.pointsOfTurnsToDown = 1.0
+pointsOfTurnsToDown = 1.0
 
-model.localInts = 0
-model.localFloats = 0
-model.localStrings = 0
-
-model.init = init
-model.onCollide = onCollide
-model.onInserted = onInserted
-model.onExplode = onExplode
-model.onNeighborInserted = onNeighborInserted
-model.onNeighborExplode = onNeighborExplode
+localInts = 0
+localFloats = 0
+localStrings = 0
     

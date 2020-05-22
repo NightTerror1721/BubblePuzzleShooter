@@ -5,6 +5,7 @@
 
 #include <SFML/Graphics/Transformable.hpp>
 
+#include "props.h"
 #include "audio.h"
 #include "assets.h"
 #include "bubble.h"
@@ -134,6 +135,7 @@ PYBIND11_EMBEDDED_MODULE(BPS, m) {
 	model.def_readwrite("floating", &BubbleModel::floating);
 	model.def_readwrite("destroyInBottom", &BubbleModel::destroyInBottom);
 	model.def_readwrite("requireDestroyToClear", &BubbleModel::requireDestroyToClear);
+	model.def_readwrite("onlyBoardColorInArrowGen", &BubbleModel::onlyBoardColorInArrowGen);
 
 	model.def_readwrite("resistence", &BubbleModel::resistence);
 
@@ -289,4 +291,23 @@ PYBIND11_EMBEDDED_MODULE(BPS, m) {
 	b.def("setLocalInt", &Bubble::setLocalInt);
 	b.def("setLocalFloat", &Bubble::setLocalFloat);
 	b.def("setLocalString", &Bubble::setLocalString);
+
+
+
+	/* Properties */
+	py::class_<Property> prop{ m, "Property" };
+	prop.def("asInt", &Property::asIntegerValue);
+	prop.def("asFloat", &Property::asFloatValue);
+	prop.def("asBoolean", &Property::asBooleanValue);
+	prop.def("asString", &Property::asStringValue);
+	prop.def("asTuple", &Property::asArrayValue);
+	prop.def("asDict", &Property::asObjectValue);
+
+	py::class_<Props> props{ m, "Props" };
+	props.def_static("getInt", &Props::getInt64);
+	props.def_static("getFloat", &Props::getDouble);
+	props.def_static("getBoolean", &Props::getBool);
+	props.def_static("getString", &Props::getString);
+	props.def_static("getTuple", &Props::getVector);
+	props.def_static("getDict", &Props::getMap);
 }

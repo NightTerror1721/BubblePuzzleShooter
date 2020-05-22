@@ -1,5 +1,7 @@
 #include "bubble.h"
 
+#include "props.h"
+
 #define BUBBLECOLOR_CODE_RED (0x1 << 0)
 #define BUBBLECOLOR_CODE_ORANGE (0x1 << 1)
 #define BUBBLECOLOR_CODE_YELLOW (0x1 << 2)
@@ -48,8 +50,11 @@ BubbleColor::Mask operator+ (const BubbleColor& left, BubbleColor::Mask right) {
 BubbleColor::Mask operator- (BubbleColor::Mask left, const BubbleColor& right) { return left & ~right._code; }
 BubbleColor::Mask operator- (const BubbleColor& left, BubbleColor::Mask right) { return right & ~left._code; }
 
-BubbleColor::Mask operator& (BubbleColor::Mask left, const BubbleColor& right) { return left & right._code; }
-BubbleColor::Mask operator& (const BubbleColor& left, BubbleColor::Mask right) { return right & left._code; }
+bool operator& (BubbleColor::Mask left, const BubbleColor& right) { return (left & right._code) == left; }
+bool operator& (const BubbleColor& left, BubbleColor::Mask right) { return (right & left._code) == right; }
+
+BubbleColor::Mask& operator+= (BubbleColor::Mask& left, const BubbleColor& right) { return left = left + right; }
+BubbleColor::Mask& operator-= (BubbleColor::Mask& left, const BubbleColor& right) { return left = left - right; }
 
 
 const BubbleColor BubbleColor::Red{ BUBBLECOLOR_CODE_RED };
@@ -285,6 +290,11 @@ void BubbleIdentifier::model(const std::string& model) { _model = model; }
 const BubbleColor& BubbleIdentifier::color() const { return _color; }
 void BubbleIdentifier::color(const BubbleColor& color) { _color = color; }
 
+Ref<Bubble> BubbleIdentifier::createBubble(BubbleHeap& heap, TextureManager& textures, bool editorMode) const
+{
+	return heap.create(_model, textures, editorMode, _color);
+}
+
 BubbleIdentifier BubbleIdentifier::invalid() { return {}; }
 
 
@@ -293,7 +303,8 @@ BubbleIdentifier BubbleIdentifier::invalid() { return {}; }
 
 
 BubbleModelManager::BubbleModelManager() :
-	Manager{ nullptr }
+	Manager{ nullptr },
+	_defaultModel{}
 {}
 BubbleModelManager::~BubbleModelManager() {}
 
@@ -303,8 +314,23 @@ Ref<BubbleModel> BubbleModelManager::createModel(const std::string& name)
 	model->name = name;
 	return model;
 }
-Ref<BubbleModel> BubbleModelManager::getModel(const std::string& name) { return Instance.get(name); }
+Ref<BubbleModel> BubbleModelManager::getModel(const std::string& name)
+{
+	auto model = Instance.get(name);
+	if (!model)
+		return getDefaultModel();
+	return model;
+}
 bool BubbleModelManager::hasModel(const std::string& name) { return Instance.has(name); }
+
+Ref<BubbleModel> BubbleModelManager::getDefaultModel()
+{
+	if (Instance._defaultModel.empty())
+		Instance._defaultModel = Instance.loadDefaultModel();
+	return Instance.get(Instance._defaultModel);
+}
+
+std::string BubbleModelManager::loadDefaultModel() { return Props::getString("default_bubble_model", ""); }
 
 BubbleModelManager BubbleModelManager::Instance{};
 
@@ -346,55 +372,49 @@ void BubbleHeap::destroy(const Ref<Bubble>& bub)
 
 
 
-
-MetaBubble::MetaBubble() :
-	_identifier{},
-	_extraInts{},
-	_extraFloats{},
-	_extraStrings{}
-{}
-MetaBubble::~MetaBubble() {}
-
-MetaBubble::operator bool() const { return _identifier; }
-bool operator! (const MetaBubble& right) { return !right._identifier; }
-
-bool operator== (const MetaBubble& left, const MetaBubble& right) { return left._identifier == right._identifier; }
-bool operator!= (const MetaBubble& left, const MetaBubble& right) { return left._identifier != right._identifier; }
-
-bool MetaBubble::isInvalid() const { return _identifier.isInvalid(); }
-
-BubbleIdentifier& MetaBubble::identifier() { return _identifier; }
-const BubbleIdentifier& MetaBubble::identifier() const { return _identifier; }
-void MetaBubble::identifier(const BubbleIdentifier& identifier) { _identifier = identifier; }
-
-const std::string& MetaBubble::model() const { return _identifier.model(); }
-void MetaBubble::model(const std::string& model) { _identifier.model(model); }
-
-const BubbleColor& MetaBubble::color() const { return _identifier.color(); }
-void MetaBubble::color(const BubbleColor& color) { _identifier.color(color); }
-
-void MetaBubble::setNumExtraInts(UInt8 count) { _extraInts.resize(count, 0); }
-void MetaBubble::setNumExtraFloats(UInt8 count) { _extraFloats.resize(count, 0.f); }
-void MetaBubble::setNumExtraStrings(UInt8 count) { _extraStrings.resize(count, {}); }
-
-UInt32 MetaBubble::extraInt(UInt8 index) const { return index >= _extraInts.size() ? 0 : _extraInts[0]; }
-void MetaBubble::extraInt(UInt8 index, UInt32 value) { if (index < _extraInts.size()) _extraInts[index] = value; }
-
-float MetaBubble::extraFloat(UInt8 index) const { return index >= _extraFloats.size() ? 0.f : _extraFloats[0]; }
-void MetaBubble::extraFloat(UInt8 index, float value) { if (index < _extraFloats.size()) _extraFloats[index] = value; }
-
-const std::string& MetaBubble::extraString(UInt8 index) const { return index >= _extraStrings.size() ? utils::EmptyString : _extraStrings[0]; }
-void MetaBubble::extraString(UInt8 index, const std::string & value) { if (index < _extraStrings.size()) _extraStrings[index] = value; }
-
-Ref<Bubble> MetaBubble::createBubble(BubbleHeap& heap, TextureManager& textures, bool editorMode)
+void RandomBubbleModelSelector::setModelScore(const std::string& model, UInt16 score)
 {
-	auto bubble = heap.create(_identifier, textures, editorMode);
-	if (!bubble)
-		return nullptr;
+	if (score == 0)
+	{
+		auto it = _models.find(model);
+		if (it != _models.end())
+			_models.erase(it);
+	}
+	else _models[model] = score;
+	_recompute = true;
+}
+UInt16 RandomBubbleModelSelector::getModelScore(const std::string& model) const
+{
+	auto it = _models.find(model);
+	return it == _models.end() ? 0U : it->second;
+}
 
-	bubble->copyLocalInts(_extraInts);
-	bubble->copyLocalFloats(_extraFloats);
-	bubble->copyLocalStrings(_extraStrings);
+Ref<BubbleModel> RandomBubbleModelSelector::selectModel(RNG& rand) const
+{
+	if (_score <= 0)
+		return BubbleModelManager::getDefaultModel();
 
-	return bubble;
+	RNG::RandomValue value = rand(0, _score);
+	for (const auto& e : _models)
+	{
+		if (value < e.second)
+			return BubbleModelManager::getModel(e.first);
+		value -= e.second;
+	}
+
+	return BubbleModelManager::getDefaultModel();
+}
+void RandomBubbleModelSelector::computeScore() const
+{
+	if (_recompute)
+	{
+		RandomBubbleModelSelector& self = *const_cast<RandomBubbleModelSelector*>(this);
+
+		RNG::RandomValue score = 0;
+		for (const auto& e : _models)
+			score += e.second;
+
+		self._score = score;
+		self._recompute = false;
+	}
 }

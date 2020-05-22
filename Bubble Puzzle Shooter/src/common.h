@@ -43,6 +43,10 @@ typedef sf::Vector2u Vec2u;
 using std::size_t;
 
 
+enum class PlayerId : UInt8 { First, Second, Single = First };
+enum class TimerMode : UInt8 { TURN = 0x1, END = 0x2, TURN_AND_END = TURN | END };
+
+
 class ID
 {
 private:
@@ -148,6 +152,10 @@ public:
 	RandomValue operator() (RandomValue min, RandomValue max);
 
 	float randomFloat();
+
+	Seed randomSeed();
+
+	RNG randomRNG();
 
 	friend RNG& operator>> (RNG& left, RandomValue& right);
 	friend RNG& operator>> (RNG& left, float& right);

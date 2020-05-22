@@ -76,7 +76,28 @@ namespace utils
 class MetaGoals
 {
 private:
-	//std::map<BubbleIdentifier, >
+	std::map<BubbleIdentifier, UInt32> _bubgoals;
+	UInt32 _clearedBoardCount;
+
+public:
+	MetaGoals();
+	MetaGoals(const MetaGoals&) = default;
+	MetaGoals(MetaGoals&&) = default;
+	~MetaGoals();
+
+	MetaGoals& operator= (const MetaGoals&) = default;
+	MetaGoals& operator= (MetaGoals&&) = default;
+
+	bool getCleanedBoard() const;
+	UInt32 getCleanedBoardCount() const;
+	void setCleanedBoardCount(UInt32 amount);
+
+	UInt32 getBubbleGoals(const BubbleIdentifier& id) const;
+	void setBubbleGoals(const BubbleIdentifier& id, UInt32 amount);
+
+	void forEachBubbleGoal(const std::function<void(std::pair<const BubbleIdentifier, UInt32>)>& action);
+
+	inline UInt32 getBubbleGoals(const std::string& model, const BubbleColor& color) { return getBubbleGoals({ model, color }); }
 };
 
 
@@ -84,7 +105,7 @@ private:
 class BinaryBubbleBoard
 {
 private:
-	utils::matrix<MetaBubble> _rows;
+	utils::matrix<BubbleIdentifier> _rows;
 	BoardColumnStyle _columns;
 
 public:
@@ -96,13 +117,119 @@ public:
 	BinaryBubbleBoard& operator= (const BinaryBubbleBoard&) = default;
 	BinaryBubbleBoard& operator= (BinaryBubbleBoard&&) = default;
 
-	MetaBubble& insertBubble(Row row, Column column, const MetaBubble& bubble);
-	MetaBubble& insertBubble(Row row, Column column, const std::string& model, const BubbleColor& color);
+	void setColumnStyle(BoardColumnStyle style);
+	BoardColumnStyle getColumnStyle() const;
 
-	MetaBubble& seekBubble(Row row, Column column);
-	const MetaBubble& seekBubble(Row row, Column column) const;
+	BubbleIdentifier& insertBubble(Row row, Column column, const BubbleIdentifier& bubble);
+	BubbleIdentifier& insertBubble(Row row, Column column, const std::string& model, const BubbleColor& color);
 
-	MetaBubble& operator[] (const std::pair<Row, Column>& index);
-	const MetaBubble& operator[] (const std::pair<Row, Column>& index) const;
+	BubbleIdentifier& peekBubble(Row row, Column column);
+	const BubbleIdentifier& peekBubble(Row row, Column column) const;
+
+	BubbleIdentifier& operator[] (const std::pair<Row, Column>& index);
+	const BubbleIdentifier& operator[] (const std::pair<Row, Column>& index) const;
+};
+
+
+
+class LevelProperties
+{
+private:
+	BoardColumnStyle _columns = BoardColumnStyle::Min;
+	PlayerId _playerid = PlayerId::Single;
+	std::vector<BinaryBubbleBoard> _bubbles;
+	HiddenBubbleContainerType _hideType = HiddenBubbleContainerType::Continuous;
+	UInt32 _clearBoardsRequired = 0U;
+	BubbleColor::Mask _availableColors = 0xFFU;
+	RNG::Seed _seed = 0;
+	UInt32 _initialBubbles = 0;
+	bool _generateUpBubbles = false;
+	RandomBubbleModelSelector _arrowBubbleSelector;
+	RandomBubbleModelSelector _boardBubbleSelector;
+	bool _roof = false;
+	bool _remote = false;
+	bool _enableTimer = true;
+	bool _hideTimer = true;
+	UInt32 _timerTurnTime = 10;
+	UInt32 _timerEndTime = 90;
+	TimerMode _timerMode = TimerMode::TURN;
+	bool _enableBubbleSwap = true;
+	std::string _background = "";
+	std::string _music = "";
+	MetaGoals _goals;
+
+public:
+	LevelProperties() = default;
+	LevelProperties(const LevelProperties&) = default;
+	LevelProperties(LevelProperties&&) = default;
+	~LevelProperties() = default;
+
+	LevelProperties& operator= (const LevelProperties&) = default;
+	LevelProperties& operator= (LevelProperties&&) = default;
+
+	BoardColumnStyle getColuns() const;
+	void setColuns(BoardColumnStyle columns);
+
+	PlayerId getPlayer() const;
+	void setPlayer(PlayerId player);
+
+	UInt32 getBubbleBoardCount() const;
+	void setBubbleBoardCount(UInt32 count);
+	
+	const BinaryBubbleBoard& getBubbleBoard(UInt32 index) const;
+	BinaryBubbleBoard& peekBubbleBoard(UInt32 index);
+
+	HiddenBubbleContainerType getHiddenBubbleContainerType() const;
+	void setHiddenBubbleContainerType(HiddenBubbleContainerType type);
+
+	UInt32 getClearedBoardRequiredCount() const;
+	void setClearedBoardRequiredCount(UInt32 amount);
+
+	BubbleColor::Mask getEnabledColors() const;
+	bool isColorEnabled(const BubbleColor& color) const;
+	void setColorEnabled(const BubbleColor& color, bool enabled);
+
+	RNG::Seed getSeed() const;
+	bool isRandomSeed() const;
+	void setSeed(RNG::Seed seed);
+	void setSeedRandom();
+
+	UInt32 getInitialFilledRows() const;
+	void setInitialFilledRows(UInt32 count);
+
+	bool isBubbleGenerationEnabled() const;
+	void setBubbleGenerationEnabled(bool enabled);
+
+	const RandomBubbleModelSelector& getArrowModelSelector() const;
+	const RandomBubbleModelSelector& getBoardModelSelector() const;
+	RandomBubbleModelSelector& peekArrowModelSelector();
+	RandomBubbleModelSelector& peekBoardModelSelector();
+
+	bool isRoofEnabled() const;
+	void setRoofEnabled(bool enabled);
+
+	bool isRemoteBubblesEnabled() const;
+	void setRemoteBubblesEnabled(bool enabled);
+
+	bool isHideTimer() const;
+	void setHideTimer(bool enabled);
+
+	UInt32 getTimerTurnTime() const;
+	void setTimerTurnTime(UInt32 seconds);
+
+	UInt32 getTimerEndTime() const;
+	void setTimerEndTime(UInt32 seconds);
+
+	TimerMode getTimerMode() const;
+	void setTimerMode(TimerMode mode);
+
+	bool isBubbleSwapEnabled() const;
+	void setBubbleSwapEnabled(bool enabled);
+
+	const std::string& getBackground() const;
+	void setBackground(const std::string& textureName);
+
+	const MetaGoals& getGoals() const;
+	MetaGoals& peekGoals();
 };
 

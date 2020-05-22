@@ -1,4 +1,1 @@
-
-
-
-testprop = 50
+default_bubble_model = "color_bubble"

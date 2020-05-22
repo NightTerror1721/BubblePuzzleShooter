@@ -185,6 +185,7 @@
     <ClCompile Include="src\props.cpp" />
     <ClCompile Include="src\py.cpp" />
     <ClCompile Include="src\resources.cpp" />
+    <ClCompile Include="src\scenario.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\assets.h" />
@@ -199,6 +200,7 @@
     <ClInclude Include="src\props.h" />
     <ClInclude Include="src\py.h" />
     <ClInclude Include="src\resources.h" />
+    <ClInclude Include="src\scenario.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
