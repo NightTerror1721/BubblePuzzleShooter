@@ -89,8 +89,6 @@ private:
 	private:
 		std::vector<BubbleIdentifier> _bubbles;
 		Int8 _count = -1;
-		UInt8 _row;
-		UInt32 _boardId;
 
 	public:
 		HiddenRow() = default;
@@ -101,8 +99,7 @@ private:
 		HiddenRow& operator= (const HiddenRow&) = default;
 		HiddenRow& operator= (HiddenRow&&) = default;
 
-		HiddenRow(const std::vector<BubbleIdentifier>& bubbles, UInt32 boardId, UInt8 row);
-		HiddenRow(UInt32 boardId, UInt8 row);
+		HiddenRow(const std::vector<BubbleIdentifier>& bubbles);
 
 		operator bool() const;
 		bool operator! () const;
@@ -114,13 +111,7 @@ private:
 
 		UInt8 getValidBubbleCount() const;
 
-		UInt8 getRowId() const;
-		void setRowId(UInt8 row);
-
-		UInt32 getBoardId() const;
-		void setBoardId(UInt32 id);
-
-		std::vector<Ref<Bubble>> generate(BubbleHeap& heap, TextureManager& textures);
+		std::vector<Ref<Bubble>> generate(BubbleHeap& heap, TextureManager& textures) const;
 	};
 
 	class HiddenBoard
@@ -138,5 +129,21 @@ private:
 
 		HiddenBoard& operator= (const HiddenBoard&) = default;
 		HiddenBoard& operator= (HiddenBoard&&) = default;
+
+		operator bool() const;
+		bool operator! () const;
+
+		bool empty() const;
+
+		UInt32 getValidBubbleCount() const;
+
+		void trimTop();
+
+		void addRow(const std::vector<BubbleIdentifier>& bubbles);
+
+		std::vector<Ref<Bubble>> extractGeneratedRow(BubbleHeap& heap, TextureManager& textures);
+		std::vector<std::vector<Ref<Bubble>>> extractAllGeneratedRows(BubbleHeap& heap, TextureManager& textures);
+
+		inline void addEmptyRow() { addRow({}); }
 	};
 };

@@ -19,8 +19,9 @@ void BubbleColorSelector::setAvailableColor(const BubbleColor& color, bool enabl
 
 const BubbleColor& BubbleColorSelector::select()
 {
+	static const auto defaultColor = BubbleColor::defaultColor();
 	return _map.empty()
-		? BubbleColor::defaultColor()
+		? defaultColor
 		: _map[_rand(0, static_cast<RNG::RandomValue>(_map.size()))];
 }
 
@@ -74,18 +75,13 @@ RNG& BubbleGenerator::rand(bool arrow) { return arrow ? _arrowRand : _boardRand;
 
 
 
-HiddenBubbleContainer::HiddenRow::HiddenRow(const std::vector<BubbleIdentifier>& bubbles, UInt32 boardId, UInt8 row) :
+HiddenBubbleContainer::HiddenRow::HiddenRow(const std::vector<BubbleIdentifier>& bubbles) :
 	_bubbles{ bubbles },
-	_count{ -1 },
-	_row{ row },
-	_boardId{ boardId }
-{}
-HiddenBubbleContainer::HiddenRow::HiddenRow(UInt32 boardId, UInt8 row) :
-	HiddenRow{ {}, boardId, row }
+	_count{ -1 }
 {}
 
 HiddenBubbleContainer::HiddenRow::operator bool() const { return !_bubbles.empty(); }
-bool HiddenBubbleContainer::HiddenRow::operator! () const { _bubbles.empty(); }
+bool HiddenBubbleContainer::HiddenRow::operator! () const { return _bubbles.empty(); }
 
 bool HiddenBubbleContainer::HiddenRow::empty() const { return _bubbles.empty(); }
 
@@ -109,13 +105,7 @@ UInt8 HiddenBubbleContainer::HiddenRow::getValidBubbleCount() const
 	return _count;
 }
 
-UInt8 HiddenBubbleContainer::HiddenRow::getRowId() const { return _row; }
-void HiddenBubbleContainer::HiddenRow::setRowId(UInt8 row) { _row = row; }
-
-UInt32 HiddenBubbleContainer::HiddenRow::getBoardId() const { return _boardId; }
-void HiddenBubbleContainer::HiddenRow::setBoardId(UInt32 id) { _boardId = id; }
-
-std::vector<Ref<Bubble>> HiddenBubbleContainer::HiddenRow::generate(BubbleHeap& heap, TextureManager& textures)
+std::vector<Ref<Bubble>> HiddenBubbleContainer::HiddenRow::generate(BubbleHeap& heap, TextureManager& textures) const
 {
 	if (!_bubbles.empty())
 	{
@@ -125,6 +115,67 @@ std::vector<Ref<Bubble>> HiddenBubbleContainer::HiddenRow::generate(BubbleHeap& 
 			bubs.push_back(heap.create(bid, textures, false));
 		}
 		return bubs;
+	}
+	return {};
+}
+
+
+
+
+HiddenBubbleContainer::HiddenBoard::operator bool() const { return !_rows.empty(); }
+bool HiddenBubbleContainer::HiddenBoard::operator! () const { return _rows.empty(); }
+
+bool HiddenBubbleContainer::HiddenBoard::empty() const { return _rows.empty(); }
+
+UInt32 HiddenBubbleContainer::HiddenBoard::getValidBubbleCount() const
+{
+	if (_modified)
+	{
+		UInt32 count = 0;
+		for (const auto& row : _rows)
+			count += static_cast<UInt32>(row.getValidBubbleCount());
+		const_cast<HiddenBoard*>(this)->_count = count;
+		const_cast<HiddenBoard*>(this)->_modified = false;
+	}
+	return _count;
+}
+
+void HiddenBubbleContainer::HiddenBoard::trimTop()
+{
+	while (!_rows.empty() && _rows.back().empty())
+		_rows.pop_back();
+}
+
+void HiddenBubbleContainer::HiddenBoard::addRow(const std::vector<BubbleIdentifier>& bubbles)
+{
+	if (_rows.size() < utils::VisibleRows)
+	{
+		_modified = true;
+		_rows.emplace_back(bubbles);
+	}
+}
+
+std::vector<Ref<Bubble>> HiddenBubbleContainer::HiddenBoard::extractGeneratedRow(BubbleHeap& heap, TextureManager& textures)
+{
+	if (!_rows.empty())
+	{
+		_modified = true;
+		auto row = _rows.front().generate(heap, textures);
+		_rows.pop_front();
+		return row;
+	}
+	return {};
+}
+std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::HiddenBoard::extractAllGeneratedRows(BubbleHeap& heap, TextureManager& textures)
+{
+	if (!_rows.empty())
+	{
+		std::vector<std::vector<Ref<Bubble>>> board{ _rows.size() };
+		_modified = true;
+		for (const auto& hrow : _rows)
+			board.push_back(hrow.generate(heap, textures));
+		_rows.clear();
+		return board;
 	}
 	return {};
 }
