@@ -158,6 +158,9 @@ private:
 	std::string _music = "";
 	MetaGoals _goals;
 
+	RNG _rand;
+	bool _randReady = false;
+
 public:
 	LevelProperties() = default;
 	LevelProperties(const LevelProperties&) = default;
@@ -193,6 +196,7 @@ public:
 	bool isRandomSeed() const;
 	void setSeed(RNG::Seed seed);
 	void setSeedRandom();
+	RNG generateRNG();
 
 	UInt32 getInitialFilledRows() const;
 	void setInitialFilledRows(UInt32 count);

@@ -59,15 +59,13 @@ public:
 	BubbleGenerator& operator= (const BubbleGenerator&) = default;
 	BubbleGenerator& operator= (BubbleGenerator&&) = default;
 
-	BubbleGenerator(const RandomBubbleModelSelector& arrowModels, const RandomBubbleModelSelector& boardModels, BubbleColor::Mask colors, RNG::Seed seed);
+	void setup(LevelProperties& props);
 
 	BubbleColor::Mask getColors() const;
 	void setColors(BubbleColor::Mask colors);
 
 	const BubbleColorSelector& getColorSelector() const;
 	BubbleColorSelector& getColorSelector();
-
-	void setSeed(RNG::Seed seed);
 
 	const RandomBubbleModelSelector& getModelSelector(bool arrow) const;
 	RandomBubbleModelSelector& getModelSelector(bool arrow);
@@ -146,4 +144,42 @@ private:
 
 		inline void addEmptyRow() { addRow({}); }
 	};
+
+private:
+	std::deque<HiddenBoard> _boards;
+	HiddenBoard* _current = nullptr;
+	UInt32 _maxBoard = 0;
+	BoardColumnStyle _columns = BoardColumnStyle::Min;
+	HiddenBubbleContainerType _type = HiddenBubbleContainerType::Continuous;
+	RNG _rand;
+
+public:
+	HiddenBubbleContainer() = default;
+	HiddenBubbleContainer(const HiddenBubbleContainer&) = default;
+	HiddenBubbleContainer(HiddenBubbleContainer&&) = default;
+
+	HiddenBubbleContainer& operator= (const HiddenBubbleContainer&) = default;
+	HiddenBubbleContainer& operator= (HiddenBubbleContainer&&) = default;
+
+	operator bool() const;
+	bool operator! () const;
+
+	bool empty() const;
+	bool isDiscrete() const;
+
+	void setup(LevelProperties& props);
+
+	void fill(const std::vector<BinaryBubbleBoard>& boards);
+
+	std::vector<std::vector<Ref<Bubble>>> generate(BubbleHeap& heap, TextureManager& textures, BubbleGenerator& bgen);
+
+	std::vector<std::vector<Ref<Bubble>>> generateBoard(BubbleHeap& heap, TextureManager& textures, BubbleGenerator& bgen);
+
+	std::vector<Ref<Bubble>> generateRow(BubbleHeap& heap, TextureManager& textures);
+
+	UInt32 getValidBubbleCount() const;
+
+private:
+	void checkNext();
+	void addHiddenRow(HiddenBoard& board, const BinaryBubbleBoard& bbb);
 };

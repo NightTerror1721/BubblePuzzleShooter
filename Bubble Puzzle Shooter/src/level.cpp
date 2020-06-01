@@ -118,8 +118,17 @@ void LevelProperties::setColorEnabled(const BubbleColor& color, bool enabled) { 
 
 RNG::Seed LevelProperties::getSeed() const { return _seed; }
 bool LevelProperties::isRandomSeed() const { return _seed == 0; }
-void LevelProperties::setSeed(RNG::Seed seed) { _seed = seed; }
-void LevelProperties::setSeedRandom() { _seed = 0; }
+void LevelProperties::setSeed(RNG::Seed seed) { _seed = seed; _randReady = false; }
+void LevelProperties::setSeedRandom() { _seed = 0; _randReady = false; }
+RNG LevelProperties::generateRNG()
+{
+	if (!_randReady)
+	{
+		_rand = _seed;
+		_randReady = true;
+	}
+	return _rand.randomRNG();
+}
 
 UInt32 LevelProperties::getInitialFilledRows() const { return _initialBubbles; }
 void LevelProperties::setInitialFilledRows(UInt32 count) { _initialBubbles = count; }

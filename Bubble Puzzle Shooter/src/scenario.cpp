@@ -37,16 +37,15 @@ void BubbleColorSelector::updateMap()
 
 
 
-BubbleGenerator::BubbleGenerator(const RandomBubbleModelSelector& arrowModels, const RandomBubbleModelSelector& boardModels, BubbleColor::Mask colors, RNG::Seed seed) :
-	_colors{},
-	_arrowRand{},
-	_boardRand{},
-	_arrowModels{ arrowModels },
-	_boardModels{ boardModels },
-	_lastColor{ BubbleColor::defaultColor() }
+void BubbleGenerator::setup(LevelProperties& props)
 {
-	setSeed(seed);
-	setColors(colors);
+	_colors.setRand(props.generateRNG());
+	_arrowRand = props.generateRNG();
+	_boardRand = props.generateRNG();
+	_arrowModels = props.getArrowModelSelector();
+	_boardModels = props.getBoardModelSelector();
+	_lastColor = BubbleColor::defaultColor();
+	setColors(props.getEnabledColors());
 }
 
 BubbleColor::Mask BubbleGenerator::getColors() const { return _colors.getAvailableColors(); }
@@ -54,14 +53,6 @@ void BubbleGenerator::setColors(BubbleColor::Mask colors) { _colors.setAvailable
 
 const BubbleColorSelector& BubbleGenerator::getColorSelector() const { return _colors; }
 BubbleColorSelector& BubbleGenerator::getColorSelector() { return _colors; }
-
-void BubbleGenerator::setSeed(RNG::Seed seed)
-{
-	RNG rand{ seed };
-	_colors.setRand(rand.randomRNG());
-	_arrowRand = rand.randomRNG();
-	_boardRand = rand.randomRNG();
-}
 
 const RandomBubbleModelSelector& BubbleGenerator::getModelSelector(bool arrow) const { return arrow ? _arrowModels : _boardModels; }
 RandomBubbleModelSelector& BubbleGenerator::getModelSelector(bool arrow) { return arrow ? _arrowModels : _boardModels; }
@@ -179,3 +170,33 @@ std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::HiddenBoard::extrac
 	}
 	return {};
 }
+
+
+
+
+
+
+
+HiddenBubbleContainer::operator bool() const { return !_boards.empty() || (_current && !_current->empty()); }
+bool HiddenBubbleContainer::operator! () const { return _boards.empty() && (!_current || _current->empty()); }
+
+bool HiddenBubbleContainer::empty() const { return _boards.empty() && (!_current || _current->empty()); }
+bool HiddenBubbleContainer::isDiscrete() const { return utils::isDiscrete(_type); }
+
+void HiddenBubbleContainer::setup(LevelProperties& props)
+{
+
+}
+
+void HiddenBubbleContainer::fill(const std::vector<BinaryBubbleBoard>& boards);
+
+std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::generate(BubbleHeap& heap, TextureManager& textures);
+
+std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::generateBoard(BubbleHeap& heap, TextureManager& textures);
+
+std::vector<Ref<Bubble>> HiddenBubbleContainer::generateRow(BubbleHeap& heap, TextureManager& textures);
+
+UInt32 HiddenBubbleContainer::getValidBubbleCount() const;
+
+void HiddenBubbleContainer::checkNext();
+void HiddenBubbleContainer::addHiddenRow(HiddenBoard& board, const BinaryBubbleBoard& bbb);
