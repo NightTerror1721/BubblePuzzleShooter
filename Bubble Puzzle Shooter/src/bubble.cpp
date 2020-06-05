@@ -40,6 +40,9 @@ std::string BubbleColor::name() const
 	return "<invalid-color>";
 }
 
+bool BubbleColor::isInvalid() const { return !(*this); }
+bool BubbleColor::isRandom() const { return !(*this); }
+
 BubbleColor::Mask BubbleColor::addToMask(BubbleColor::Mask mask) const { return mask | _code; }
 BubbleColor::Mask BubbleColor::removeFromMask(BubbleColor::Mask mask) { return mask & ~_code; }
 bool BubbleColor::hasInMask(BubbleColor::Mask mask) const { return mask & _code; }

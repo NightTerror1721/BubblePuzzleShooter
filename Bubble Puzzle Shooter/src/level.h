@@ -37,8 +37,10 @@ namespace utils
 	constexpr Column styleToColumn(BoardColumnStyle style) { return utils::clamp(static_cast<Column>(style), MinColumnCount, MaxColumnCount); }
 	constexpr BoardColumnStyle columnToStyle(Column columnCount) { return static_cast<BoardColumnStyle>(utils::clamp(columnCount, MaxColumnCount, MaxColumnCount)); }
 
-	constexpr bool isPairColumn(Column column) { return is_pair(column); }
-	constexpr bool isPairColumn(BoardColumnStyle style) { return is_pair(styleToColumn(style)); }
+	constexpr bool isPairRow(Row row) { return is_pair(row); }
+
+	constexpr Column adaptIfIsOdd(Row row, Column columns) { return isPairRow(row) ? columns : columns - 1; }
+	constexpr Column adaptIfIsOdd(Row row, BoardColumnStyle columns) { return adaptIfIsOdd(row, styleToColumn(columns)); }
 }
 
 constexpr BoardColumnStyle operator"" _cs(unsigned long long int value) { return utils::columnToStyle(static_cast<Column>(value)); }
@@ -128,6 +130,10 @@ public:
 
 	BubbleIdentifier& operator[] (const std::pair<Row, Column>& index);
 	const BubbleIdentifier& operator[] (const std::pair<Row, Column>& index) const;
+
+	const std::vector<BubbleIdentifier>& peekRow(Row row) const;
+
+	const std::vector<BubbleIdentifier>& operator[] (Row row) const;
 };
 
 

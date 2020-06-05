@@ -2,6 +2,110 @@
 
 #include "common.h"
 
+template<typename _Ty>
+class ReferenceAllocator final
+{
+private:
+	_Ty* _data;
+
+private:
+	void _createCopy(const _Ty& value)
+	{
+		_data = reinterpret_cast<_Ty*>(new std::byte[sizeof(_Ty)]);
+		utils::reconstruct<_Ty, const _Ty&>(*_data, value);
+	}
+	void _createMove(_Ty&& value)
+	{
+		_data = reinterpret_cast<_Ty*>(new std::byte[sizeof(_Ty)]);
+		utils::reconstruct<_Ty, _Ty&&>(*_data, std::move(value));
+	}
+
+	ReferenceAllocator& _copyValue(const _Ty& value)
+	{
+		if (_data)
+		{
+			utils::destruct(*_data);
+			*_data = value;
+		}
+		else
+		{
+			_createCopy(value);
+		}
+		return *this;
+	}
+	ReferenceAllocator& _moveValue(_Ty&& value) noexcept
+	{
+		if (_data)
+		{
+			utils::destruct(*_data);
+			*_data = std::move(value);
+		}
+		else
+		{
+			_createMove(std::move(value));
+		}
+		return *this;
+	}
+
+	inline ReferenceAllocator& _copy(const ReferenceAllocator& ra)
+	{
+		return _copyValue(*ra._data);
+	}
+	ReferenceAllocator& _move(ReferenceAllocator&& ra) noexcept
+	{
+		_moveValue(std::move(*ra._data));
+		delete[] reinterpret_cast<std::byte*>(ra._data);
+		ra._data = nullptr;
+		return *this;
+	}
+
+	void _del()
+	{
+		if (_data)
+		{
+			utils::destruct(*_data);
+			delete[] reinterpret_cast<std::byte*>(_data);
+			_data = nullptr;
+		}
+	}
+
+public:
+	ReferenceAllocator() : _data{ nullptr } {}
+	ReferenceAllocator(decltype(nullptr)) : _data{ nullptr } {}
+	ReferenceAllocator(const ReferenceAllocator& ra) : _data{ nullptr } { _copy(ra); }
+	ReferenceAllocator(ReferenceAllocator&& ra) noexcept : _data{ nullptr } { _move(std::move(ra)); }
+	~ReferenceAllocator() { _del(); }
+
+	ReferenceAllocator& operator= (const ReferenceAllocator& ra) { return _copy(ra); }
+	ReferenceAllocator& operator= (ReferenceAllocator&& ra) { return _move(std::move(ra)); }
+	ReferenceAllocator& operator= (decltype(nullptr)) { _del(); return *this; }
+
+	ReferenceAllocator(const _Ty* value) : ReferenceAllocator{} { if (value) _createCopy(*value); }
+	ReferenceAllocator(const _Ty& value) : ReferenceAllocator{} { _createCopy(value); }
+	ReferenceAllocator(_Ty&& value) : ReferenceAllocator{} { _createMove(std::move(value)); }
+
+	ReferenceAllocator& operator= (const _Ty& value) { return _copyValue(value); }
+	ReferenceAllocator& operator= (_Ty&& value) { return _moveValue(std::move(value)); }
+	ReferenceAllocator& operator= (const _Ty* value)
+	{
+		if (value)
+			return _copyValue(*value);
+		_del();
+		return *this;
+	}
+
+	bool operator== (const ReferenceAllocator&) const = default;
+
+	operator bool() const { return _data; }
+	bool operator! () const { return !_data; }
+
+	_Ty& operator* () { return *_data; }
+	const _Ty& operator* () const { return *_data; }
+
+	_Ty* operator-> () { return _data; }
+	const _Ty* operator-> () const { return _data; }
+};
+
 namespace memory
 {
 	template<typename _Base>

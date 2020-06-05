@@ -44,6 +44,9 @@ public:
 	auto operator<=> (const BubbleColor&) const = default;
 	bool operator== (const BubbleColor&) const = default;
 
+	bool isInvalid() const;
+	bool isRandom() const;
+
 	UInt8 code() const;
 	std::string name() const;
 

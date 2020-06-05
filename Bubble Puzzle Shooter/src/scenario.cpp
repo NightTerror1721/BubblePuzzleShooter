@@ -61,6 +61,13 @@ const BubbleColor& BubbleGenerator::getLastColor() const { return _lastColor; }
 
 RNG& BubbleGenerator::rand(bool arrow) { return arrow ? _arrowRand : _boardRand; }
 
+Ref<Bubble> BubbleGenerator::generateFromIdentifier(const BubbleIdentifier& id, TextureManager& textures)
+{
+	if (id.color().isRandom())
+		return _heap.create(id.model(), textures, false, _colors.select());
+	return _heap.create(id, textures, false);
+}
+
 
 
 
@@ -185,18 +192,78 @@ bool HiddenBubbleContainer::isDiscrete() const { return utils::isDiscrete(_type)
 
 void HiddenBubbleContainer::setup(LevelProperties& props)
 {
-
+	_boards.clear();
+	_current = nullptr;
+	_columns = props.getColuns();
+	_type = props.getHiddenBubbleContainerType();
+	_rand = props.generateRNG();
 }
 
-void HiddenBubbleContainer::fill(const std::vector<BinaryBubbleBoard>& boards);
+void HiddenBubbleContainer::fill(const std::vector<BinaryBubbleBoard>& bin)
+{
+	_boards.clear();
+	_current = nullptr;
+	if (bin.empty())
+		return;
 
-std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::generate(BubbleHeap& heap, TextureManager& textures);
+	std::vector<HiddenBoard> aux;
+	for (const auto& bbb : bin)
+		addHiddenBoard(aux, bbb);
 
-std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::generateBoard(BubbleHeap& heap, TextureManager& textures);
+	if (!utils::isDiscrete(_type) && aux.size() > 1)
+		aux.back().trimTop();
 
-std::vector<Ref<Bubble>> HiddenBubbleContainer::generateRow(BubbleHeap& heap, TextureManager& textures);
+	if (utils::isRandom(_type))
+	{
+		while (!aux.empty())
+		{
+			RNG::RandomValue idx = _rand(aux.size());
+			auto it = aux.begin() + idx;
+			_boards.push_back(std::move(*it));
+			aux.erase(it);
+		}
+	}
+	else for (auto& board : aux)
+		_boards.push_back(std::move(board));
+}
 
-UInt32 HiddenBubbleContainer::getValidBubbleCount() const;
+std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::generate(BubbleGenerator& bgen, TextureManager& textures);
 
-void HiddenBubbleContainer::checkNext();
-void HiddenBubbleContainer::addHiddenRow(HiddenBoard& board, const BinaryBubbleBoard& bbb);
+std::vector<std::vector<Ref<Bubble>>> HiddenBubbleContainer::generateBoard(BubbleGenerator& bgen, TextureManager& textures);
+
+std::vector<Ref<Bubble>> HiddenBubbleContainer::generateRow(BubbleGenerator& bgen, TextureManager& textures);
+
+UInt32 HiddenBubbleContainer::getValidBubbleCount() const
+{
+	UInt32 count = 0;
+	for (const auto& board : _boards)
+		count += board.getValidBubbleCount();
+	return count;
+}
+
+void HiddenBubbleContainer::checkNext()
+{
+	if (!_current || _current->empty())
+	{
+		const auto& board = 
+	}
+}
+void HiddenBubbleContainer::addHiddenBoard(std::vector<HiddenBoard>& aux, const BinaryBubbleBoard& bbb)
+{
+	HiddenBoard board;
+	for (Row row = utils::VisibleRows - 1; row >= 0; row--)
+		addHiddenRow(board, bbb[row], row);
+	aux.push_back(std::move(board));
+}
+void HiddenBubbleContainer::addHiddenRow(HiddenBoard& board, const std::vector<BubbleIdentifier>& brow, Row row)
+{
+	Column columns = utils::adaptIfIsOdd(row, _columns);
+	std::vector<BubbleIdentifier> ids{ columns };
+	for (Column c = 0; c < columns; c++)
+	{
+		if (c >= brow.size())
+			ids.push_back(BubbleIdentifier::invalid());
+		else ids.push_back(brow[c]);
+	}
+	board.addRow(ids);
+}

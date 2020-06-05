@@ -44,18 +44,10 @@ bool operator!= (const Object& left, const Object& right) { return left._id != r
 RNG::RNG() :
 	RNG{ static_cast<Seed>(utils::systemTime()) }
 {}
-RNG::RNG(Seed seed, RandomValue min, RandomValue max) :
-	_rand{ seed },
-	_min{ min },
-	_max{ max }
+RNG::RNG(Seed seed) :
+	_rand{ seed }
 {}
 RNG::~RNG() {}
-
-RNG::RandomValue RNG::min() const { return _min; }
-void RNG::min(RandomValue value) { minmax(value, _max); }
-
-RNG::RandomValue RNG::max() const { return _max; }
-void RNG::max(RandomValue value) { minmax(_min, value); }
 
 RNG::RandomValue RNG::operator() (RandomValue __min, RandomValue __max)
 {
@@ -63,18 +55,19 @@ RNG::RandomValue RNG::operator() (RandomValue __min, RandomValue __max)
 	auto max = std::max(__min, __max);
 	return (_rand() % (max - min)) + min;
 }
+RNG::RandomValue RNG::operator() (RandomValue __max)
+{
+	auto min = std::min(RNG::min(), __max);
+	auto max = std::max(RNG::min(), __max);
+	return (_rand() % (max - min)) + min;
+}
+RNG::RandomValue RNG::operator() () { return _rand(); }
 
 float RNG::randomFloat() { return _rand() / static_cast<float>(std::minstd_rand::max()); }
 
 RNG::Seed RNG::randomSeed() { return static_cast<Seed>(_rand()); }
 
 RNG RNG::randomRNG() { return { randomSeed() }; }
-
-void RNG::minmax(RandomValue min, RandomValue max)
-{
-	_min = std::min(min, max);
-	_max = std::max(min, max);
-}
 
 RNG& operator>> (RNG& left, RNG::RandomValue& right) { right = left(); return left; }
 RNG& operator>> (RNG& left, float& right) { right = left.randomFloat(); return left; }

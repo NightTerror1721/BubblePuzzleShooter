@@ -49,6 +49,10 @@ const BubbleIdentifier& BinaryBubbleBoard::operator[] (const std::pair<Row, Colu
 	return _rows[utils::clamp(index.first, 0U, utils::VisibleRows - 1)][utils::clamp(index.second, 0U, utils::styleToColumn(_columns))];
 }
 
+const std::vector<BubbleIdentifier>& BinaryBubbleBoard::peekRow(Row row) const { return _rows[utils::clamp(row, 0U, utils::VisibleRows - 1)]; }
+
+const std::vector<BubbleIdentifier>& BinaryBubbleBoard::operator[] (Row row) const { return _rows[utils::clamp(row, 0U, utils::VisibleRows - 1)]; }
+
 
 
 

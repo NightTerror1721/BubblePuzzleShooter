@@ -130,12 +130,10 @@ public:
 
 private:
 	std::minstd_rand _rand;
-	RandomValue _min;
-	RandomValue _max;
 
 public:
 	RNG();
-	RNG(Seed seed, RandomValue min = std::minstd_rand::min(), RandomValue max = std::minstd_rand::max());
+	RNG(Seed seed);
 	RNG(const RNG&) = default;
 	RNG(RNG&&) = default;
 	~RNG();
@@ -143,13 +141,9 @@ public:
 	RNG& operator= (const RNG&) = default;
 	RNG& operator= (RNG&&) = default;
 
-	RandomValue min() const;
-	void min(RandomValue value);
-
-	RandomValue max() const;
-	void max(RandomValue value);
-
 	RandomValue operator() (RandomValue min, RandomValue max);
+	RandomValue operator() (RandomValue max);
+	RandomValue operator() ();
 
 	float randomFloat();
 
@@ -172,11 +166,9 @@ public:
 	friend bool operator< (RNG& left, RandomValue right);
 	friend bool operator< (RNG& left, float right);
 
-	inline RandomValue operator() (RandomValue max) { return (*this)(_min, max); }
-	inline RandomValue operator() () { return (*this)(_min, _max); }
-
-private:
-	void minmax(RandomValue min, RandomValue max);
+public:
+	static constexpr RandomValue min() { return std::minstd_rand::min(); }
+	static constexpr RandomValue max() { return std::minstd_rand::max(); }
 };
 
 

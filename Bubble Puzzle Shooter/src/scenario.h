@@ -43,6 +43,7 @@ private:
 class BubbleGenerator
 {
 private:
+	BubbleHeap _heap;
 	BubbleColorSelector _colors;
 	RNG _arrowRand;
 	RNG _boardRand;
@@ -71,6 +72,8 @@ public:
 	RandomBubbleModelSelector& getModelSelector(bool arrow);
 
 	const BubbleColor& getLastColor() const;
+
+	Ref<Bubble> generateFromIdentifier(const BubbleIdentifier& id, TextureManager& textures);
 
 private:
 	RNG& rand(bool arrow);
@@ -122,11 +125,11 @@ private:
 	public:
 		HiddenBoard() = default;
 		HiddenBoard(const HiddenBoard&) = default;
-		HiddenBoard(HiddenBoard&&) = default;
+		HiddenBoard(HiddenBoard&&) noexcept = default;
 		~HiddenBoard() = default;
 
 		HiddenBoard& operator= (const HiddenBoard&) = default;
-		HiddenBoard& operator= (HiddenBoard&&) = default;
+		HiddenBoard& operator= (HiddenBoard&&) noexcept = default;
 
 		operator bool() const;
 		bool operator! () const;
@@ -147,8 +150,7 @@ private:
 
 private:
 	std::deque<HiddenBoard> _boards;
-	HiddenBoard* _current = nullptr;
-	UInt32 _maxBoard = 0;
+	ReferenceAllocator<HiddenBoard> _current;
 	BoardColumnStyle _columns = BoardColumnStyle::Min;
 	HiddenBubbleContainerType _type = HiddenBubbleContainerType::Continuous;
 	RNG _rand;
@@ -171,15 +173,16 @@ public:
 
 	void fill(const std::vector<BinaryBubbleBoard>& boards);
 
-	std::vector<std::vector<Ref<Bubble>>> generate(BubbleHeap& heap, TextureManager& textures, BubbleGenerator& bgen);
+	std::vector<std::vector<Ref<Bubble>>> generate(BubbleGenerator& bgen, TextureManager& textures);
 
-	std::vector<std::vector<Ref<Bubble>>> generateBoard(BubbleHeap& heap, TextureManager& textures, BubbleGenerator& bgen);
+	std::vector<std::vector<Ref<Bubble>>> generateBoard(BubbleGenerator& bgen, TextureManager& textures);
 
-	std::vector<Ref<Bubble>> generateRow(BubbleHeap& heap, TextureManager& textures);
+	std::vector<Ref<Bubble>> generateRow(BubbleGenerator& bgen, TextureManager& textures);
 
 	UInt32 getValidBubbleCount() const;
 
 private:
 	void checkNext();
-	void addHiddenRow(HiddenBoard& board, const BinaryBubbleBoard& bbb);
+	void addHiddenBoard(std::vector<HiddenBoard>& aux, const BinaryBubbleBoard& bbb);
+	void addHiddenRow(HiddenBoard& board, const std::vector<BubbleIdentifier>& brow, Row row);
 };
